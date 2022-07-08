@@ -36,3 +36,9 @@ application {
     // Define the main class for the application.
     mainClass = 'jlox.App'
 }
+
+tasks {
+    run {
+        standardInput = System.in
+    }
+}
