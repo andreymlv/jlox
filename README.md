@@ -1,6 +1,6 @@
 # jlox
 
-A tree-walk interpreter for Lox Programming Language written in Java.
+A tree-walk interpreter for [Lox](https://craftinginterpreters.com/the-lox-language.html) Programming Language written in Java.
 
 ## Quick Start
 
