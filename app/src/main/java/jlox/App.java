@@ -5,7 +5,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Scanner;
 
 /**
  * Lox interpreter.
@@ -22,9 +23,19 @@ public final class App {
     }
   }
 
+  /**
+   * Read file and run.
+   *
+   * @param path to file
+   * @throws IOException
+   */
   public static void runFile(final String path) throws IOException {
-    final var bytes = Files.readAllBytes(Path.of(path));
-    run(new String(bytes, Charset.defaultCharset()));
+    final var bytes = Files.readAllBytes(Paths.get(path));
+    try {
+      run(new String(bytes, Charset.defaultCharset()));
+    } catch (final RuntimeErrorException e) {
+      // TODO: handle exception
+    }
   }
 
   /**
@@ -40,7 +51,11 @@ public final class App {
       final var line = reader.readLine();
       if (line == null) // EOF
         break;
-      run(line);
+      try {
+        run(line);
+      } catch (final RuntimeErrorException e) {
+        // TODO: handle exception
+      }
     }
   }
 
@@ -50,7 +65,14 @@ public final class App {
    *
    * @param string expession
    */
-  private static void run(final String string) {
+  private static void run(final String source) throws RuntimeErrorException {
+    final var scanner = new Scanner(source);
+    if (scanner.hasNext()) {
+      final var tokens = scanner.next().toCharArray();
+      scanner.close();
+      for (final var token : tokens) {
+        System.out.println(token);
+      }
+    }
   }
-
 }
