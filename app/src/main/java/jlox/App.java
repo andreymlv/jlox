@@ -19,7 +19,7 @@ public final class App {
     } else if (args.length == 1) {
       runFile(args[0]);
     } else {
-      runPromt();
+      runPrompt();
     }
   }
 
@@ -43,7 +43,7 @@ public final class App {
    *
    * @throws IOException
    */
-  private static void runPromt() throws IOException {
+  private static void runPrompt() throws IOException {
     final var input = new InputStreamReader(System.in);
     final var reader = new BufferedReader(input);
     while (true) {
@@ -63,16 +63,16 @@ public final class App {
    * Evaluate expression.
    * TODO: rename to `evaluate` and return evaluated expression value as string.
    *
-   * @param string expession
+   * @param string expression
    */
   private static void run(final String source) throws RuntimeErrorException {
     final var scanner = new Scanner(source);
     if (scanner.hasNext()) {
       final var tokens = scanner.next().toCharArray();
-      scanner.close();
       for (final var token : tokens) {
         System.out.println(token);
       }
     }
+    scanner.close();
   }
 }
