@@ -5,6 +5,7 @@ import java.util.List;
 
 public final class Scanner {
     private final String source;
+    private final List<RuntimeErrorException> errors = new ArrayList<>();
     private final List<Token> tokens = new ArrayList<>();
     private int start = 0;
     private int current = 0;
@@ -65,7 +66,8 @@ public final class Scanner {
                 addToken(TokenType.STAR);
                 break;
             default:
-                throw new RuntimeErrorException(line, source.substring(start, current), "Unexpected character.");
+                errors.add(new RuntimeErrorException(line, source.substring(start, current), "Unexpected character."));
+                break;
         }
     }
 
@@ -73,6 +75,13 @@ public final class Scanner {
         while (!isAtEnd()) {
             start = current;
             scanToken();
+        }
+        if (!errors.isEmpty()) {
+            final var error = new RuntimeErrorException();
+            for (final var runtimeErrorException : errors) {
+                error.addSuppressed(runtimeErrorException);
+            }
+            throw error;
         }
         tokens.add(new Token(TokenType.EOF, "", null, line));
         return tokens;
