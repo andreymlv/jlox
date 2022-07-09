@@ -33,7 +33,7 @@ public final class App {
     try {
       run(new String(bytes, Charset.defaultCharset()));
     } catch (final RuntimeErrorException e) {
-      // TODO: handle exception
+      System.err.println("Runtime error: " + e.toString());
     }
   }
 
@@ -53,7 +53,7 @@ public final class App {
       try {
         run(line);
       } catch (final RuntimeErrorException e) {
-        // TODO: handle exception
+        System.err.println("Runtime error: " + e.toString());
       }
     }
   }

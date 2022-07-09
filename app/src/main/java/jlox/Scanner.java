@@ -31,7 +31,7 @@ public final class Scanner {
         tokens.add(new Token(type, text, literal, line));
     }
 
-    private void scanToken() {
+    private void scanToken() throws RuntimeErrorException {
         final var c = advance();
         switch (c) {
             case '(':
@@ -65,11 +65,11 @@ public final class Scanner {
                 addToken(TokenType.STAR);
                 break;
             default:
-                break;
+                throw new RuntimeErrorException(line, source.substring(start, current), "Unexpected character.");
         }
     }
 
-    public List<Token> scanTokens() {
+    public List<Token> scanTokens() throws RuntimeErrorException {
         while (!isAtEnd()) {
             start = current;
             scanToken();
