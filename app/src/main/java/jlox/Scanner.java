@@ -3,6 +3,8 @@ package jlox;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.checkerframework.checker.units.qual.s;
+
 public final class Scanner {
     private final String source;
     private final List<RuntimeErrorException> errors = new ArrayList<>();
@@ -46,6 +48,26 @@ public final class Scanner {
         if (isAtEnd())
             return '\0';
         return source.charAt(current);
+    }
+
+    private void string() {
+        while (peek() != '"' && !isAtEnd()) {
+            if (peek() == '\n')
+                line++;
+            advance();
+        }
+
+        if (isAtEnd()) {
+            errors.add(new RuntimeErrorException(line, source.substring(start, current), "Unterminated string."));
+            return;
+        }
+
+        // The closing ".
+        advance();
+
+        // Trim the surrounding quotes.
+        final var value = source.substring(start + 1, current - 1);
+        addToken(TokenType.STRING, value);
     }
 
     /**
@@ -114,6 +136,9 @@ public final class Scanner {
                 break;
             case '\n':
                 line++;
+                break;
+            case '"':
+                string();
                 break;
             default:
                 errors.add(new RuntimeErrorException(line, source.substring(start, current), "Unexpected character."));
