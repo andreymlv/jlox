@@ -6,7 +6,6 @@ import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Scanner;
 
 /**
  * Lox interpreter.
@@ -67,12 +66,9 @@ public final class App {
    */
   private static void run(final String source) throws RuntimeErrorException {
     final var scanner = new Scanner(source);
-    if (scanner.hasNext()) {
-      final var tokens = scanner.next().toCharArray();
-      for (final var token : tokens) {
-        System.out.println(token);
-      }
+    final var tokens = scanner.scanTokens();
+    for (final var token : tokens) {
+      System.out.println(token);
     }
-    scanner.close();
   }
 }
