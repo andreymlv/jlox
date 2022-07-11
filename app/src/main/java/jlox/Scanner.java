@@ -1,20 +1,38 @@
 package jlox;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-
-import org.checkerframework.checker.units.qual.s;
+import java.util.Map;
 
 public final class Scanner {
     private final String source;
     private final List<RuntimeErrorException> errors = new ArrayList<>();
     private final List<Token> tokens = new ArrayList<>();
+    private final Map<String, TokenType> keywords = new HashMap<>();
+
     private int start = 0;
     private int current = 0;
     private int line = 1;
 
     public Scanner(final String source) {
         this.source = source;
+        keywords.put("and", TokenType.AND);
+        keywords.put("class", TokenType.CLASS);
+        keywords.put("else", TokenType.ELSE);
+        keywords.put("false", TokenType.FALSE);
+        keywords.put("for", TokenType.FOR);
+        keywords.put("fun", TokenType.FUN);
+        keywords.put("if", TokenType.IF);
+        keywords.put("nil", TokenType.NIL);
+        keywords.put("or", TokenType.OR);
+        keywords.put("print", TokenType.PRINT);
+        keywords.put("return", TokenType.RETURN);
+        keywords.put("super", TokenType.SUPER);
+        keywords.put("this", TokenType.THIS);
+        keywords.put("true", TokenType.TRUE);
+        keywords.put("var", TokenType.VAR);
+        keywords.put("while", TokenType.WHILE);
     }
 
     private boolean isAtEnd() {
@@ -68,6 +86,55 @@ public final class Scanner {
         // Trim the surrounding quotes.
         final var value = source.substring(start + 1, current - 1);
         addToken(TokenType.STRING, value);
+    }
+
+    private boolean isDigit(final char c) {
+        return c >= '0' && c <= '9';
+    }
+
+    private char peekNext() {
+        if (current + 1 >= source.length())
+            return '\0';
+        return source.charAt(current + 1);
+    }
+
+    private void number() {
+        while (isDigit(peek())) {
+            advance();
+        }
+        // Look for a fractional part.
+        if (peek() == '.' && isDigit(peekNext())) {
+            // Consume the "."
+            advance();
+
+            while (isDigit(peek()))
+                advance();
+        }
+
+        addToken(TokenType.NUMBER,
+                Double.parseDouble(source.substring(start, current)));
+    }
+
+    private boolean isAlpha(final char c) {
+        return (c >= 'a' && c <= 'z') ||
+                (c >= 'A' && c <= 'Z') ||
+                c == '_';
+    }
+
+    private void identifier() {
+        while (isAlphaNumeric(peek()))
+            advance();
+        final var text = source.substring(start, current);
+        final var type = keywords.get(text);
+        if (type == null) {
+            addToken(TokenType.IDENTIFIER);
+        } else {
+            addToken(type);
+        }
+    }
+
+    private boolean isAlphaNumeric(final char c) {
+        return isAlpha(c) || isDigit(c);
     }
 
     /**
@@ -125,6 +192,10 @@ public final class Scanner {
                     // A comment goes until the end of the line.
                     while (peek() != '\n' && !isAtEnd())
                         advance();
+                } else if (match('*')) {
+                    // Peek until all nested comments closed and */ is founded.
+                    errors.add(new RuntimeErrorException(line, source.substring(start, current),
+                            "Multiline comments aren't implemented yet."));
                 } else {
                     addToken(TokenType.SLASH);
                 }
@@ -141,11 +212,24 @@ public final class Scanner {
                 string();
                 break;
             default:
-                errors.add(new RuntimeErrorException(line, source.substring(start, current), "Unexpected character."));
+                if (isDigit(c)) {
+                    number();
+                } else if (isAlpha(c)) {
+                    identifier();
+                } else {
+                    errors.add(
+                            new RuntimeErrorException(line, source.substring(start, current), "Unexpected character."));
+                }
                 break;
         }
     }
 
+    /**
+     * Scan tokens and check for errors.
+     * 
+     * @return Tokens of input string from user or exception with error.
+     * @throws RuntimeErrorException
+     */
     public List<Token> scanTokens() throws RuntimeErrorException {
         while (!isAtEnd()) {
             start = current;
